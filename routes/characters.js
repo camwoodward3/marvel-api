@@ -4,6 +4,6 @@ const { getAllCharacters, getCharacterById, createCharacter } = require('../cont
 
 router.get('/', getAllCharacters);
 router.get('/:id', getCharacterById);
-router.get('/', createCharacter);
+router.post('/', createCharacter);
 
 module.exports = router;

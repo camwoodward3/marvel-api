@@ -1,9 +1,9 @@
 const express = require('express');
 const router = express.Router();
-const { getAllComics, getComicsById, createComic } = require('../controllers/comicsController');
+const { getAllComics, getComicById, createComic } = require('../controllers/comicsController');
 
 router.get('/', getAllComics);
-router.get('/:id', getComicsById);
-router.get('/', createComic);
+router.get('/:id', getComicById);
+router.post('/', createComic);
 
 module.exports = router;

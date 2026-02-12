@@ -7,11 +7,16 @@ const doc = {
     description: 'API for Marvel Comics and MCU characters',
     version: '1.0.0'
   },
-  host: 'localhost:5000',
+  host: process.env.HOST || 'localhost:5050',
   schemes: ['http']
 };
 
 const outputFile = './swagger.json';
-const endpointsFiles = ['./server.js'];
+const endpointsFiles = [
+  './server.js',
+  './routes/characters.js',
+  './routes/movies.js',
+  './routes/comics.js'
+];
 
 swaggerAutogen(outputFile, endpointsFiles, doc);

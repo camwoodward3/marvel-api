@@ -1,9 +1,20 @@
 const mongoose = require('mongoose');
 
 const movieSchema = new mongoose.Schema({
-  title: { type: String, required: true },
-  releaseDate: Date,
-  characters: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Character' }]
+  title: { 
+    type: String, 
+    required: true,
+    trim: true
+  },
+  releaseDate: {
+    type: Date,
+    required: true
+  },
+
+  characters: [{ 
+    type: mongoose.Schema.Types.ObjectId, 
+    ref: 'Character' 
+  }]
 }, { timestamps: true});
 
 module.exports =

@@ -110,9 +110,61 @@
         }
       }
     },
-    "/api/movies/{id}": {
+        "/api/movies/{id}": {
+          "get": {
+            "description": "",
+            "parameters": [
+              {
+                "name": "id",
+                "in": "path",
+                "required": true,
+                "type": "string"
+              }
+            ],
+            "responses": {
+              "200": {
+                "description": "OK"
+              },
+              "400": {
+                "description": "Bad Request"
+              },
+              "404": {
+                "description": "Not Found"
+              },
+              "500": {
+                "description": "Internal Server Error"
+              }
+            }
+          }
+        },
+        "/api/comics/": {
+          "get": {
+            "description": "",
+            "responses": {
+              "200": {
+                "description": "OK"
+              },
+              "500": {
+                "description": "Internal Server Error"
+              }
+            }
+          },
+          "post": {
+            "description": "",
+            "responses": {
+              "201": {
+                "description": "Created"
+              },
+              "400": {
+                "description": "Bad Request"
+              }
+            }
+          }
+        },
+        "/api/comics/{id}": {
       "get": {
-        "description": "",
+        "tags": ["Comics"],
+        "summary": "Get comic by ID",
         "parameters": [
           {
             "name": "id",
@@ -122,48 +174,37 @@
           }
         ],
         "responses": {
-          "200": {
-            "description": "OK"
-          },
-          "400": {
-            "description": "Bad Request"
-          },
-          "404": {
-            "description": "Not Found"
-          },
-          "500": {
-            "description": "Internal Server Error"
-          }
-        }
-      }
-    },
-    "/api/comics/": {
-      "get": {
-        "description": "",
-        "responses": {
-          "200": {
-            "description": "OK"
-          },
-          "500": {
-            "description": "Internal Server Error"
-          }
+          "200": { "description": "Comic found" },
+          "404": { "description": "Comic not found" },
+          "400": { "description": "Invalid ID" }
         }
       },
-      "post": {
-        "description": "",
-        "responses": {
-          "201": {
-            "description": "Created"
+      "put": {
+        "tags": ["Comics"],
+        "summary": "Update a comic",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string"
           },
-          "400": {
-            "description": "Bad Request"
+          {
+            "in": "body",
+            "name": "body",
+            "required": true,
+            "schema": { "$ref": "#/definitions/Comic" }
           }
+        ],
+        "responses": {
+          "200": { "description": "Comic updated" },
+          "404": { "description": "Comic not found" },
+          "400": { "description": "Validation error" }
         }
-      }
-    },
-    "/api/comics/{id}": {
-      "get": {
-        "description": "",
+      },
+      "delete": {
+        "tags": ["Comics"],
+        "summary": "Delete a comic",
         "parameters": [
           {
             "name": "id",
@@ -173,45 +214,31 @@
           }
         ],
         "responses": {
-          "200": {
-            "description": "OK"
-          },
-          "400": {
-            "description": "Bad Request"
-          },
-          "404": {
-            "description": "Not Found"
-          },
-          "500": {
-            "description": "Internal Server Error"
-          }
+          "200": { "description": "Comic deleted" },
+          "404": { "description": "Comic not found" }
         }
       }
-    },
-    "/{id}": {
-      "get": {
-        "description": "",
-        "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "type": "string"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK"
-          },
-          "400": {
-            "description": "Bad Request"
-          },
-          "404": {
-            "description": "Not Found"
-          },
-          "500": {
-            "description": "Internal Server Error"
-          }
+    }
+  },
+  "definitions": {
+    "Comic": {
+      "type": "object",
+      "properties": {
+        "_id": {
+          "type": "string"
+        },
+        "title": {
+          "type": "string"
+        },
+        "issueNumber": {
+          "type": "integer"
+        },
+        "publisher": {
+          "type": "string"
+        },
+        "releaseDate": {
+          "type": "string",
+          "format": "date"
         }
       }
     }

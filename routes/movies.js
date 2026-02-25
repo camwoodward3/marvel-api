@@ -38,7 +38,7 @@ router.put(
   [
     param('id', 'Invalid ID').isMongoId(),
     body('title').optional().notEmpty(),
-    body('releaseDate').optional.isISO8601(),
+    body('releaseDate').optional().isISO8601(),
     body('characters').optional().isArray()
   ],
   ensureAuth, 

@@ -1,177 +1,184 @@
 {
   "swagger": "2.0",
   "info": {
-    "title": "Marvel Characters API",
-    "description": "API for Marvel Comics and MCU characters",
+    "title": "Marvel API",
+    "description": "API for Marvel Characters, Movies, and Comics with OAuth authentication",
     "version": "1.0.0"
   },
   "host": "localhost:5050",
   "basePath": "/",
-  "schemes": [
-    "http"
-  ],
+  "schemes": ["http"],
+  "securityDefinitions": {
+  "googleOAuth": {
+    "type": "oauth2",
+    "authorizationUrl": "https://accounts.google.com/o/oauth2/auth",
+    "flow": "implicit",
+    "scopes": {
+      "profile": "Access to your basic profile info",
+      "email": "Access to your email address"
+    }
+  }
+},
   "paths": {
-    "/": {
+    "/api/characters": {
       "get": {
-        "description": "",
+        "summary": "Get all characters",
+        "security": [
+            { "googleOAuth": ["profile", "email"] }
+        ],
         "responses": {
-          "200": {
-            "description": "OK"
-          },
-          "500": {
-            "description": "Internal Server Error"
-          }
+          "200": { "description": "List of characters" },
+          "500": { "description": "Internal Server Error" }
         }
       },
       "post": {
-        "description": "",
-        "responses": {
-          "201": {
-            "description": "Created"
-          },
-          "400": {
-            "description": "Bad Request"
+        "summary": "Create a new character",
+        "security": [
+            { "googleOAuth": ["profile", "email"] }
+        ],
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": { "$ref": "#/definitions/Character" }
           }
-        }
-      }
-    },
-    "/api/characters/": {
-      "get": {
-        "description": "",
+        ],
         "responses": {
-          "200": {
-            "description": "OK"
-          },
-          "500": {
-            "description": "Internal Server Error"
-          }
-        }
-      },
-      "post": {
-        "description": "",
-        "responses": {
-          "201": {
-            "description": "Created"
-          },
-          "400": {
-            "description": "Bad Request"
-          }
+          "201": { "description": "Character created" },
+          "400": { "description": "Invalid data" }
         }
       }
     },
     "/api/characters/{id}": {
       "get": {
-        "description": "",
+        "summary": "Get character by ID",
         "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "type": "string"
-          }
+          { "name": "id", "in": "path", "required": true, "type": "string" }
         ],
         "responses": {
-          "200": {
-            "description": "OK"
-          },
-          "400": {
-            "description": "Bad Request"
-          },
-          "404": {
-            "description": "Not Found"
-          },
-          "500": {
-            "description": "Internal Server Error"
-          }
+          "200": { "description": "Character found" },
+          "404": { "description": "Character not found" },
+          "400": { "description": "Invalid ID" }
+        }
+      },
+      "put": {
+        "summary": "Update character by ID",
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "type": "string" },
+          { "name": "body", "in": "body", "required": true, "schema": { "$ref": "#/definitions/Character" } }
+        ],
+        "responses": {
+          "200": { "description": "Character updated" },
+          "404": { "description": "Character not found" },
+          "400": { "description": "Invalid data" }
+        }
+      },
+      "delete": {
+        "summary": "Delete character by ID",
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "type": "string" }
+        ],
+        "responses": {
+          "200": { "description": "Character deleted" },
+          "404": { "description": "Character not found" },
+          "400": { "description": "Invalid ID" }
         }
       }
     },
-    "/api/movies/": {
+
+    "/api/movies": {
       "get": {
-        "description": "",
+        "summary": "Get all movies",
+        "security": [
+            { "googleOAuth": ["profile", "email"] }
+        ],
         "responses": {
-          "200": {
-            "description": "OK"
-          },
-          "500": {
-            "description": "Internal Server Error"
-          }
+          "200": { "description": "List of movies" },
+          "500": { "description": "Internal Server Error" }
         }
       },
       "post": {
-        "description": "",
+        "summary": "Create a new movie",
+        "security": [
+            { "googleOAuth": ["profile", "email"] }
+        ],
+        "parameters": [
+          { "name": "body", "in": "body", "required": true, "schema": { "$ref": "#/definitions/Movie" } }
+        ],
         "responses": {
-          "201": {
-            "description": "Created"
-          },
-          "400": {
-            "description": "Bad Request"
-          }
+          "201": { "description": "Movie created" },
+          "400": { "description": "Invalid data" }
         }
       }
     },
-        "/api/movies/{id}": {
-          "get": {
-            "description": "",
-            "parameters": [
-              {
-                "name": "id",
-                "in": "path",
-                "required": true,
-                "type": "string"
-              }
-            ],
-            "responses": {
-              "200": {
-                "description": "OK"
-              },
-              "400": {
-                "description": "Bad Request"
-              },
-              "404": {
-                "description": "Not Found"
-              },
-              "500": {
-                "description": "Internal Server Error"
-              }
-            }
-          }
-        },
-        "/api/comics/": {
-          "get": {
-            "description": "",
-            "responses": {
-              "200": {
-                "description": "OK"
-              },
-              "500": {
-                "description": "Internal Server Error"
-              }
-            }
-          },
-          "post": {
-            "description": "",
-            "responses": {
-              "201": {
-                "description": "Created"
-              },
-              "400": {
-                "description": "Bad Request"
-              }
-            }
-          }
-        },
-        "/api/comics/{id}": {
+    "/api/movies/{id}": {
       "get": {
-        "tags": ["Comics"],
+        "summary": "Get movie by ID",
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "type": "string" }
+        ],
+        "responses": {
+          "200": { "description": "Movie found" },
+          "404": { "description": "Movie not found" },
+          "400": { "description": "Invalid ID" }
+        }
+      },
+      "put": {
+        "summary": "Update movie by ID",
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "type": "string" },
+          { "name": "body", "in": "body", "required": true, "schema": { "$ref": "#/definitions/Movie" } }
+        ],
+        "responses": {
+          "200": { "description": "Movie updated" },
+          "404": { "description": "Movie not found" },
+          "400": { "description": "Invalid data" }
+        }
+      },
+      "delete": {
+        "summary": "Delete movie by ID",
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "type": "string" }
+        ],
+        "responses": {
+          "200": { "description": "Movie deleted" },
+          "404": { "description": "Movie not found" },
+          "400": { "description": "Invalid ID" }
+        }
+      }
+    },
+
+    "/api/comics": {
+      "get": {
+        "summary": "Get all comics",
+        "security": [
+            { "googleOAuth": ["profile", "email"] }
+        ],
+        "responses": {
+          "200": { "description": "List of comics" },
+          "500": { "description": "Internal Server Error" }
+        }
+      },
+      "post": {
+        "summary": "Create a new comic",
+        "security": [
+            { "googleOAuth": ["profile", "email"] }
+        ],
+        "parameters": [
+          { "name": "body", "in": "body", "required": true, "schema": { "$ref": "#/definitions/Comic" } }
+        ],
+        "responses": {
+          "201": { "description": "Comic created" },
+          "400": { "description": "Invalid data" }
+        }
+      }
+    },
+    "/api/comics/{id}": {
+      "get": {
         "summary": "Get comic by ID",
         "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "type": "string"
-          }
+          { "name": "id", "in": "path", "required": true, "type": "string" }
         ],
         "responses": {
           "200": { "description": "Comic found" },
@@ -180,66 +187,61 @@
         }
       },
       "put": {
-        "tags": ["Comics"],
-        "summary": "Update a comic",
+        "summary": "Update comic by ID",
         "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "type": "string"
-          },
-          {
-            "in": "body",
-            "name": "body",
-            "required": true,
-            "schema": { "$ref": "#/definitions/Comic" }
-          }
+          { "name": "id", "in": "path", "required": true, "type": "string" },
+          { "name": "body", "in": "body", "required": true, "schema": { "$ref": "#/definitions/Comic" } }
         ],
         "responses": {
           "200": { "description": "Comic updated" },
           "404": { "description": "Comic not found" },
-          "400": { "description": "Validation error" }
+          "400": { "description": "Invalid data" }
         }
       },
       "delete": {
-        "tags": ["Comics"],
-        "summary": "Delete a comic",
+        "summary": "Delete comic by ID",
         "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "type": "string"
-          }
+          { "name": "id", "in": "path", "required": true, "type": "string" }
         ],
         "responses": {
           "200": { "description": "Comic deleted" },
-          "404": { "description": "Comic not found" }
+          "404": { "description": "Comic not found" },
+          "400": { "description": "Invalid ID" }
         }
       }
     }
   },
+
   "definitions": {
+    "Character": {
+      "type": "object",
+      "required": ["name", "universe"],
+      "properties": {
+        "name": { "type": "string", "example": "Peter Parker" },
+        "alias": { "type": "string", "example": "Spider-Man" },
+        "universe": { "type": "string", "example": "MCU" },
+        "firstAppearance": { "type": "string", "example": "Amazing Fantasy #15" },
+        "powers": { "type": "array", "items": { "type": "string" }, "example": ["Wall-crawling", "Spider-Sense"] },
+        "movies": { "type": "array", "items": { "type": "string" }, "example": ["movieId1"] },
+        "comics": { "type": "array", "items": { "type": "string" }, "example": ["comicId1"] }
+      }
+    },
+    "Movie": {
+      "type": "object",
+      "required": ["title"],
+      "properties": {
+        "title": { "type": "string", "example": "Avengers: Endgame" },
+        "releaseDate": { "type": "string", "example": "2019-04-26" },
+        "characters": { "type": "array", "items": { "type": "string" }, "example": ["characterId1"] }
+      }
+    },
     "Comic": {
       "type": "object",
+      "required": ["title"],
       "properties": {
-        "_id": {
-          "type": "string"
-        },
-        "title": {
-          "type": "string"
-        },
-        "issueNumber": {
-          "type": "integer"
-        },
-        "publisher": {
-          "type": "string"
-        },
-        "releaseDate": {
-          "type": "string",
-          "format": "date"
-        }
+        "title": { "type": "string", "example": "Amazing Spider-Man #1" },
+        "releaseDate": { "type": "string", "example": "1963-03-01" },
+        "characters": { "type": "array", "items": { "type": "string" }, "example": ["characterId1"] }
       }
     }
   }

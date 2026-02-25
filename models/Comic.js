@@ -1,8 +1,15 @@
 const mongoose = require('mongoose');
 
 const comicSchema = new mongoose.Schema({
-  title: { type: String, required: true },
-  issueNumber: { type: Number, required: true}
+  title: { 
+    type: String, 
+    required: true,
+    trim: true
+  },
+  issueNumber: { 
+    type: Number, 
+    required: true
+  }
 }, { timestamps: true });
 
 module.exports =

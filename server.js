@@ -1,15 +1,26 @@
 const express = require('express');
+require('dotenv').config();
 const mongoose = require('mongoose');
-const dotenv = require('dotenv');
 const cors = require('cors');
+const session = require('express-session');
+const passport = require('passport');
+require('./config/passport');
 
 const swaggerUi = require('swagger-ui-express');
 const swaggerDocument = require('./swagger.json');
 
-dotenv.config();
 const app = express();
 app.use(cors());
 app.use(express.json());
+
+app.use(session({
+  secret: process.env.SESSION_SECRET,
+  resave: false,
+  saveUninitialized: false
+}));
+
+app.use(passport.initialize());
+app.use(passport.session());
 
 // MongoDB connection
 mongoose.connect(process.env.MONGODB_URI)
@@ -26,6 +37,8 @@ app.get('/', (req, res) => res.send('API is running'));
 app.use('/api/characters', require('./routes/characters'));
 app.use('/api/movies', require('./routes/movies'));
 app.use('/api/comics', require('./routes/comics'));
+app.use('/auth', require('./routes/auth'));
+
 
 // Swagger UI
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));

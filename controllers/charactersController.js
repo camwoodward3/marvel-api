@@ -1,36 +1,35 @@
 const mongoose = require('mongoose');
 const Character = require('../models/Character');
+const { validationResult } = require('express-validator');
 
-// GET all
 exports.getAllCharacters = async (req, res) => {
   try {
-    const characters = await Character.find()
-      .populate('movies')
-      .populate('comics');
-
-    res.status(200).json(characters);
-  } catch (err) {
-    res.status(500).json({ message: err.message });
+    const characters = await Character.find().lean();
+    res.json(characters);
+  } catch(err) {
+    res.status(500).json({ message: 'Failed to fetch characters' });
   }
 };
 
-// GET by ID
 exports.getCharacterById = async (req, res) => {
   try {
-    const character = await Character.findById(req.params.id)
-      .populate('movies')
-      .populate('comics');
-      
-    if (!character) {
-      return res.status(400).json({ message: 'Character not found' });
+    const { id } = req.params;
+
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).json({ message: 'Invalid Character ID' });
     }
-    res.status(200).json(character);
+
+    const character = await Character.findById(id).lean();
+    if(!character) {
+      return res.status(404).json({ message: 'Character not found' });
+    }
+
+    res.json(character);
   } catch (err) {
-    res.status(400).json({ message: 'Inavlid ID format' });
+    res.status(500).json({ message: 'Failed to fetch character' });
   }
 };
 
-// CREATE
 exports.createCharacter = async (req, res) => {
   try {
     const character = new Character(req.body);
@@ -50,7 +49,7 @@ exports.updateCharacter = async (req, res) => {
       { new: true, runValidators: true }
     );
 
-    if (!comic) {
+    if (!character) {
       return res.status(404).json({ message: 'Character not found' });
     }
     res.status(200).json(character);

@@ -1,5 +1,6 @@
 const express = require('express');
 const router = express.Router();
+const { body, param } = require('express-validator');
 const { 
   getAllCharacters, 
   getCharacterById, 
@@ -8,10 +9,39 @@ const {
   deleteCharacter 
 } = require('../controllers/charactersController');
 
+const { ensureAuth } = require('../middleware/auth');
+
 router.get('/', getAllCharacters);
-router.get('/:id', getCharacterById);
-router.post('/', createCharacter);
-router.put('/:id', updateCharacter);
-router.delete('/:id', deleteCharacter);
+router.get(
+  '/:id', 
+  param('id', 'Invalid ID').isMongoId(),
+  getCharacterById);
+
+router.post(
+  '/', 
+  [
+    body('name', 'Name is required').notEmpty(),
+    body('universe', 'Universe must be "Comics" or "MCU"')
+      .isIn(['Comics', 'MCU']),
+    body('powers', 'Powers must be an array').isArray(),
+  ],
+  ensureAuth, 
+  createCharacter);
+
+router.put(
+  '/:id',
+  [
+    param('id', 'Invalid ID').isMongoId(),
+    body('universe').optional().isIn(['Comics', 'MCU']),
+    body('powers').optional().isArray(),
+  ],
+   ensureAuth, 
+   updateCharacter);
+router.delete(
+  '/:id',
+  param('id', 'Invalid ID').isMongoId(),
+  ensureAuth, 
+  deleteCharacter
+);
 
 module.exports = router;

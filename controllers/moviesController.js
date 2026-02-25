@@ -35,3 +35,36 @@ exports.createMovie = async (req, res) => {
     res.status(400).json({ message: 'Failed to create movie', error: err.message });
   }
 };
+
+exports.updateMovie = async (req, res) => {
+  try {
+    const updatedMovie = await Movie.findByIdAndUpdate(
+      id,
+      req.body,
+      { new: true, runValidators: true }
+    );
+
+    if (!updatedMovie) {
+      return res.status(404).json({ message: 'Movie not found'})
+    }
+    res.json(updatedMovie);
+  } catch (err) {
+    res.status(400).json({ message: 'Failed to update movie', error: err.message });
+  }
+};
+
+exports.deleteMovie = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const deletedMovie = await Movie.findByIdAndDelete(id);
+
+    if (!deletedMovie) {
+      return res.status(404).json({ message: 'Movie not found' });
+    }
+    
+    res.json({ message: 'Movie deleted successfully' });
+  } catch (err) {
+    res.status(500).json({ message: 'Failed to delete movie' });
+  }
+};

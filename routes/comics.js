@@ -21,12 +21,9 @@ router.get(
 router.post(
   '/', 
   [
-    body('title', 'Title is required').notEmpty(),
-    body('publisher', 'Publisher is required').notEmpty(),
-    body('characters', 'Characters must be an array of IDs')
-      .optional()
-      .isArray()
-      .custom(arr => arr.every(id => typeof id === 'string'))
+    body('title', 'Title is required').trim().notEmpty(),
+    body('issueNumber', 'Issue number must be a number').isNumeric(),
+    body('characters').optional().isArray(),
   ],
   ensureAuth, 
   createComic

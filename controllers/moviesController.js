@@ -38,6 +38,7 @@ exports.createMovie = async (req, res) => {
 
 exports.updateMovie = async (req, res) => {
   try {
+    const { id } = req.params;
     const updatedMovie = await Movie.findByIdAndUpdate(
       id,
       req.body,

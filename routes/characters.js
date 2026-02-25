@@ -20,7 +20,7 @@ router.get(
 router.post(
   '/', 
   [
-    body('name', 'Name is required').notEmpty(),
+    body('name', 'Name is required').trim().notEmpty(),
     body('universe', 'Universe must be "Comics" or "MCU"')
       .isIn(['Comics', 'MCU']),
     body('powers', 'Powers must be an array').isArray(),

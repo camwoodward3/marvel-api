@@ -2,7 +2,7 @@ const mongoose = require('mongoose');
 
 const characterSchema = new mongoose.Schema({
   name: { type: String, required: true },
-  alias: String,
+  alias: { type: String, trim: true },
   universe: { type: [String], enum: ['Comics', 'MCU'], required: true },
   firstAppearance: String,
   powers: [String],
@@ -10,4 +10,4 @@ const characterSchema = new mongoose.Schema({
   comics: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Comic' }]
 }, { timestamps: true });
 
-module.exports = mongoose.model('Character', characterSchema);
+module.exports = mongoose.models.Character || mongoose.model('Character', characterSchema);

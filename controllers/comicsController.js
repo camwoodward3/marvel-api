@@ -33,6 +33,6 @@ exports.createComic = async (req, res) => {
     await comic.save();
     res.status(201).json(comic);
   } catch (err) {
-    res.status(400).json({ message: 'Failed to create omic', error: err.message });
+    res.status(400).json({ message: 'Failed to create comic', error: err.message });
   }
 };

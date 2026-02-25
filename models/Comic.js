@@ -9,7 +9,11 @@ const comicSchema = new mongoose.Schema({
   issueNumber: { 
     type: Number, 
     required: true
-  }
+  },
+  characters: [{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Character'
+  }]
 }, { timestamps: true });
 
 module.exports =

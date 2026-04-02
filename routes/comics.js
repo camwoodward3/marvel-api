@@ -20,30 +20,30 @@ router.get(
 
 router.post(
   '/', 
+  ensureAuth, 
   [
     body('title', 'Title is required').trim().notEmpty(),
-    body('issueNumber', 'Issue number must be a number').isNumeric(),
+    body('issueNumber', 'Issue number must be a number').optional().isNumeric(),
     body('characters').optional().isArray(),
   ],
-  ensureAuth, 
   createComic
 );
 
 router.put(
   '/:id', 
+  ensureAuth, 
   [
     param('id', 'Invalid ID').isMongoId(),
     body('title').optional().notEmpty(),
     body('publisher').optional().notEmpty(),
     body('characters').optional().isArray()
   ],
-  ensureAuth, 
   updateComic
 );
 router.delete(
   '/:id', 
-  param('id', 'Invalid ID').isMongoId(),
   ensureAuth, 
+  param('id', 'Invalid ID').isMongoId(),
   deleteComic);
 
 module.exports = router;

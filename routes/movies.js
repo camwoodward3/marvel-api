@@ -19,6 +19,7 @@ router.get(
   getMovieById);
 router.post(
   '/',
+  ensureAuth, 
   [
     body('title', 'Title is required').notEmpty(),
     body('releaseDate', 'Release date must be a valid date')
@@ -29,25 +30,24 @@ router.post(
       .isArray()
       .custom(arr => arr.every(id => typeof id === 'string'))
   ],  
-  ensureAuth, 
   createMovie
 );
 
 router.put(
   '/:id', 
+  ensureAuth,
   [
     param('id', 'Invalid ID').isMongoId(),
     body('title').optional().notEmpty(),
     body('releaseDate').optional().isISO8601(),
-    body('characters').optional().isArray()
+    body('characters').optional().isArray().custom(arr => arr.every(id => typeof id === 'string'))
   ],
-  ensureAuth, 
-  updateMovie
+    updateMovie
 );
 
 router.delete(
   '/:id', 
-  param('id', 'Invalid ID').isMongoId(),
+  [param('id', 'Invalid ID').isMongoId()],
   ensureAuth, 
   deleteMovie);
 

@@ -1,45 +1,76 @@
-const mongoose = require('mongoose');
-const Character = require('../models/Character');
+const mongodb = require('../db/connect');
+const { ObjectId } = require('mongodb');
 const { validationResult } = require('express-validator');
 
+const getCollection = () => mongodb.getDb().db().collection('characters');
+
 exports.getAllCharacters = async (req, res) => {
-  try {
-    const characters = await Character.find().lean();
-    res.json(characters);
-  } catch(err) {
-    res.status(500).json({ message: 'Failed to fetch characters' });
-  }
+    try {
+      const result = await getCollection.find();     // Get the DB instance and target the collection
+      const characters = await result.toArray();      // Convert the cursor to an array
+
+      res.setHeader('Content-Type', 'application/json');
+      res.status(200).json(characters);
+    } catch (err) {
+      res.status(500).json({ message: 'Failed to fetch characters' });
+    }
 };
 
 exports.getCharacterById = async (req, res) => {
   try {
-    const { id } = req.params;
-
-    if (!mongoose.Types.ObjectId.isValid(id)) {
-      return res.status(400).json({ message: 'Invalid Character ID' });
+    if (!ObjectId.isValid(req.params.id)) {
+      return res.status(400).json('Invalid Character ID');
     }
 
-    const character = await Character.findById(id).lean();
-    if(!character) {
+    const characterId = new ObjectId(req.params.id);
+
+    const character = await mongodb
+      .getDb()
+      .db()
+      .collection('characters')
+      .findOne({ _id: characterId });
+
+    if (!character) {
       return res.status(404).json({ message: 'Character not found' });
     }
 
-    res.json(character);
+    res.status(200).json(character);
   } catch (err) {
-    res.status(500).json({ message: 'Validation failed', error: err.message });
+    res.status(500).json({ message: err.message || 'Error retrieving character' });
   }
 };
 
 exports.createCharacter = async (req, res) => {
-
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
     return res.status(400).json({ errors: errors.array() });
   }
+
   try {
-    const character = new Character(req.body);
-    await character.save();
-    res.status(201).json(character);
+    const characterData = {
+      name: req.body.name,
+      alias: req.body.alias,
+      universe: req.body.universe,
+      firstAppearance: req.body.firstAppearance,
+      powers: req.body.powers,
+      movies: req.body.movies,
+      comics: req.body.comics
+    };
+
+    const response = await mongodb
+      .getDb()
+      .db()
+      .collection('characters')
+      .insertOne(characterData);
+
+    if (response.acknowledged) {
+      res.status(201).json({
+        _id: response.insertedId,
+        ...characterData
+      });
+    } else {
+      res.status(500).json({ message: 'Some error occurred while creating the character.' });
+    }
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
@@ -48,39 +79,55 @@ exports.createCharacter = async (req, res) => {
 // UPDATE (PUT)
 exports.updateCharacter = async (req, res) => {
   try {
-    const { id } = req.params;
-    if (!mongoose.Types.ObjectId.isValid(id)) {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
       return res.status(400).json({ message: 'Invalid ID format' });
     }
-    const character = await Character.findByIdAndUpdate(
-      id,
-      req.body,
-      { new: true, runValidators: true }
-    );
 
-    if (!character) {
-      return res.status(404).json({ message: 'Character not found' });
+    const characterId = new ObjectId(req.params.id);
+
+    const updatedCharacter = {
+      name: req.body.name,
+      alias: req.body.alias,
+      universe: req.body.universe,
+      powers: req.body.powers,
+      movies: req.body.movies,
+      comics: req.body.comics
     }
-    res.status(200).json(character);
-  } catch (err) {
-    res.status(400).json({ message:'Update failed', error: err.message });
-  }
-};
+    
+    const response = await mongodb
+      .getDb()
+      .db()
+      .collection('characters')
+      .updateOne({ _id: characterId }, { $set: updatedCharacter}
+
+      );
+
+    
+      if (response.modifiedCount > 0) {
+        res.status(204).send();
+      } else {
+        res.status(404).json('Character not found or no data changed.')
+      }
+    } catch (err) {
+      res.status(500).json({ message: 'Update failed', error: err.message });
+    }
+  };
 
 // DELETE
 exports.deleteCharacter = async (req, res) => {
   try {
-    const { id } = req.params;
-    if (!mongoose.Types.ObjectId.isValid(id)) {
+    if (!ObjectId.isValid(req.params.id)) {
       return res.status(400).json({ message: 'Invalid ID format' });
     }
-    const character = await Character.findByIdAndDelete(req.params.id);
+    const characterId = new ObjectId(req.params.id);
+    const response = await getCollection().deleteOne({ _id: characterId });
 
-    if (!character) {
-      return res.status(404).json({ message: 'Character not found' });
+    if (response.deletedCount > 0) {
+      res.status(200).json({ message: 'Character deleted successfully' });
+    } else {
+      res.status(404).json('Character not found.');
     }
-
-    res.status(200).json({ message: 'Character deleted successfully' });
   } catch (err) {
     res.status(500).json({ message: 'Delete failed', error: err.message });
   }

@@ -1,16 +1,19 @@
 const express = require('express');
-require('dotenv').config();
-const mongoose = require('mongoose');
-const cors = require('cors');
+const bodyParser = require('body-parser');
+const mongodb = require('../db/connect');
 const session = require('express-session');
-const MongoStore = require('connect-mongo');
 const passport = require('passport');
-require('./config/passport');
-
+// const cors = require('cors');
 const swaggerUi = require('swagger-ui-express');
 const swaggerDocument = require('./swagger.json');
 
+require('dotenv').config();
+require('./config/passport');
+
 const app = express();
+const PORT = process.env.PORT || 5050;
+
+
 app.set('trust proxy', 1);
 app.use(cors({
   origin: process.env.FRONTEND_URL || '*',
@@ -22,10 +25,6 @@ app.use(session({
   secret: process.env.SESSION_SECRET,
   resave: false,
   saveUninitialized: false,
-  store: MongoStore.create({
-    mongoUrl: process.env.MONGODB_URI,
-    collectionName: 'sessions'
-  }),
   cookie: {
     secure: process.env.NODE_ENV === 'production',
     sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax'
@@ -36,13 +35,6 @@ app.use(passport.initialize());
 app.use(passport.session());
 
 // MongoDB connection
-mongoose.connect(process.env.MONGODB_URI)
-  .then(() => console.log('MongoDB connected'))
-  .catch(err => {
-    console.log('MongoDB connection error:', err);
-    process.exit(1);
-  });
-
 // Health check
 app.get('/', (req, res) => res.send('API is running'));
 
@@ -53,8 +45,12 @@ app.use('/api/comics', require('./routes/comics'));
 app.use('/auth', require('./routes/auth'));
 
 
-// Swagger UI
-app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
-
-const PORT = process.env.PORT || 5050;
-app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+mongodb.initDb((err) => {
+  if (err) {
+    console.error('Failed to connect to MongoDB:', err);
+  } else {
+    app.listen(PORT, () => {
+      console.log(`Connected to DB and listening on port ${PORT}`);
+    })
+  }
+})

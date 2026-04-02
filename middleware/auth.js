@@ -4,3 +4,7 @@ function ensureAuth(req, res, next) {
 }
 
 module.exports = { ensureAuth };
+
+function verifyGoogleToken() {
+  
+}

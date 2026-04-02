@@ -1,11 +1,10 @@
 const express = require('express');
 const bodyParser = require('body-parser');
-const mongodb = require('../db/connect');
+const mongodb = require('./db/connect');
 const session = require('express-session');
 const passport = require('passport');
-// const cors = require('cors');
-const swaggerUi = require('swagger-ui-express');
-const swaggerDocument = require('./swagger.json');
+const cors = require('cors');
+
 
 require('dotenv').config();
 require('./config/passport');

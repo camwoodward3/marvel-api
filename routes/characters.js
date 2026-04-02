@@ -1,47 +1,109 @@
-const express = require('express');
-const router = express.Router();
-const { body, param } = require('express-validator');
-const { 
-  getAllCharacters, 
-  getCharacterById, 
-  createCharacter,
-  updateCharacter,
-  deleteCharacter 
-} = require('../controllers/charactersController');
+const router = require('express').Router();
+const mongodb = require('../db/connect');
+const { ObjectId } = require('mongodb');
 
-const { ensureAuth } = require('../middleware/auth');
+const getCollection = () => {
+  return mongodb.getDb().db().collection('characters');
+};
 
-router.get('/', getAllCharacters);
-router.get(
-  '/:id', 
-  param('id', 'Invalid ID').isMongoId(),
-  getCharacterById);
+const buildCharacter = (body) => {
+  return {
+    name: body.name,
+    realName: body.realName || '',
+    universe: body.universe,
+    powers: body.powers || [],
+    teams: body.teams || [],
+    firstAppearance: body.firstAppearance || '',
+  };
+};
 
-router.post(
-  '/', 
-  [
-    body('name', 'Name is required').trim().notEmpty(),
-    body('universe', 'Universe must be "Comics" or "MCU"')
-      .isIn(['Comics', 'MCU']),
-    body('powers', 'Powers must be an array').isArray(),
-  ],
-  ensureAuth, 
-  createCharacter);
+const validateCharacter = (character) => {
+  if (!character.name || !character.universe ) {
+    return 'name and universe are required';
+  }
+  return null;
+};
 
-router.put(
-  '/:id',
-  [
-    param('id', 'Invalid ID').isMongoId(),
-    body('universe').optional().isIn(['Comics', 'MCU']),
-    body('powers').optional().isArray(),
-  ],
-   ensureAuth, 
-   updateCharacter);
-router.delete(
-  '/:id',
-  param('id', 'Invalid ID').isMongoId(),
-  ensureAuth, 
-  deleteCharacter
-);
+router.get('/', async (req, res) => {
+  try {
+    const result = await getCollection().find().toArray();
+    res.status(200).json(result);
+  } catch (error) {
+    console.error('GET /characters error:', error);
+    res.status(500).json({ message: 'Failed to get characters', error: error.message });
+  }
+});
+
+router.post('/', async (req, res) => {
+  try {
+    const character = buildCharacter(req.body);
+    const validationError = validateCharacter(character);
+
+    if (validationError) {
+      return res.status(400).json({ message: validationError });
+    }
+
+    const result = await getCollection().insertOne(character);
+
+    res.status(201).json({
+      message: 'Character created successfully',
+      id: result.insertedId,
+      character: character
+    });
+   } catch (error) {
+    console.error('POST /characters error:', error);
+    res.status(500).json({ message: 'Failed to create character', error: error.message });
+   }
+});
+
+router.put('/:id', async(req, res) => {
+  try {
+    if (!ObjectId.isValid(req.params.id)) {
+      return res.status(400).json({ message: 'Invalid character ID' });
+    }
+    
+    const updateCharacter = buildCharacter(req.body);
+    const validationError = validateCharacter(updateCharacter);
+
+    if (validationError) {
+      return res.status(400).json({ message: validationError });
+    }
+
+    const result = await getCollection().replaceOne(
+      { _id: new ObjectId(req.params.id) },
+      updateCharacter
+    );
+
+    if (result.matchedCount === 0) {
+      return res.status(404).json({ message: 'Character not found' });
+    }
+
+    res.status(200).json({
+      message: 'Character updated successfully',
+      id: req.params.id
+    });
+  } catch (error) {
+    console.error('PUT /characters/:id error:', error);
+    res.status(500).json({ message: 'Failed to update character', error: error.message });
+  }
+});
+
+router.delete('/:id', async(req, res) => {
+  try {
+    if(!ObjectId.isValid(req.params.id)) {
+      return res.status(400).json({ message: 'Invalid character ID' });
+    }
+
+    const result = await getCollection().deleteOne({ _id: new ObjectId(req.params.id) });
+    if (result.deletedCount === 0) {
+      return res.status(404).json({ message: 'Character not found' });
+    }
+
+    res.status(200).json({ message: 'Character deleted successfully' });
+  } catch (error) {
+    console.error('DELETE /characters/:id error:', error);
+    res.status(500).json({ message: 'Failed to delete character', error: error.message });
+  }
+});
 
 module.exports = router;

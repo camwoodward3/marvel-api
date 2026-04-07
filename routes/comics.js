@@ -1,6 +1,7 @@
 const router = require('express').Router();
 const mongodb = require('../db/connect');
 const { ObjectId } = require('mongodb');
+const { ensureAuth } = require('../middleware/auth');
 
 const getCollection = () => {
   return mongodb.getDb().db().collection('comics');
@@ -34,7 +35,7 @@ router.get('/', async (req, res) => {
 
 // POST
 
-router.post('/', async (req, res) => {
+router.post('/', ensureAuth, async (req, res) => {
   try {
     const comic = buildComic(req.body);
     const validationError = validateComic(comic);
@@ -51,7 +52,7 @@ router.post('/', async (req, res) => {
 });
 
 // PUT
-router.put('/:id', async(req, res) => {
+router.put('/:id', ensureAuth, async(req, res) => {
   try {
     if (!ObjectId.isValid(req.params.id)) {
       return res.status(400).json({ message: 'Invalid Comic ID' });
@@ -84,7 +85,7 @@ router.put('/:id', async(req, res) => {
 });
 
 // DELETE
-router.delete('/:id', async(req, res) => {
+router.delete('/:id', ensureAuth, async(req, res) => {
   try {
     if(!ObjectId.isValid(req.params.id)) {
       return res.status(400).json({ message: 'Invalid Comic ID' });

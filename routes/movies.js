@@ -1,6 +1,7 @@
 const router = require('express').Router();
 const mongodb = require('../db/connect');
 const { ObjectId } = require('mongodb');
+const { ensureAuth } = require('../middleware/auth');
 
 const getCollection = () => {
   return mongodb.getDb().db().collection('Movies');
@@ -31,7 +32,7 @@ router.get('/', async (req, res) => {
   }
 });
 
-router.post('/', async (req, res) => {
+router.post('/', ensureAuth, async (req, res) => {
   try {
     const Movie = buildMovie(req.body);
     const validationError = validateMovie(Movie);
@@ -53,7 +54,7 @@ router.post('/', async (req, res) => {
    }
 });
 
-router.put('/:id', async(req, res) => {
+router.put('/:id', ensureAuth, async(req, res) => {
   try {
     if (!ObjectId.isValid(req.params.id)) {
       return res.status(400).json({ message: 'Invalid Movie ID' });
@@ -85,7 +86,7 @@ router.put('/:id', async(req, res) => {
   }
 });
 
-router.delete('/:id', async(req, res) => {
+router.delete('/:id', ensureAuth, async(req, res) => {
   try {
     if(!ObjectId.isValid(req.params.id)) {
       return res.status(400).json({ message: 'Invalid Movie ID' });

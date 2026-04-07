@@ -33,8 +33,11 @@ app.use(session({
 app.use(passport.initialize());
 app.use(passport.session());
 
+app.use('/auth', require('./routes/auth'));
+app.use('/api/characters', require('./routes/characters'));
+app.use('/api/movies', require('./routes/movies'));
+app.use('/api/comics', require('./routes/comics'));
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
-app.use('/', require('./routes'));
 
 
 // MongoDB connection

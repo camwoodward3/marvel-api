@@ -1,6 +1,7 @@
 const router = require('express').Router();
 const mongodb = require('../db/connect');
 const { ObjectId } = require('mongodb');
+const {ensureAuth} = require('../middleware/auth');
 
 const getCollection = () => {
   return mongodb.getDb().db().collection('characters');
@@ -34,7 +35,7 @@ router.get('/', async (req, res) => {
   }
 });
 
-router.post('/', async (req, res) => {
+router.post('/', ensureAuth, async (req, res) => {
   try {
     const character = buildCharacter(req.body);
     const validationError = validateCharacter(character);
@@ -56,7 +57,7 @@ router.post('/', async (req, res) => {
    }
 });
 
-router.put('/:id', async(req, res) => {
+router.put('/:id', ensureAuth, async(req, res) => {
   try {
     if (!ObjectId.isValid(req.params.id)) {
       return res.status(400).json({ message: 'Invalid character ID' });
@@ -88,7 +89,7 @@ router.put('/:id', async(req, res) => {
   }
 });
 
-router.delete('/:id', async(req, res) => {
+router.delete('/:id', ensureAuth, async(req, res) => {
   try {
     if(!ObjectId.isValid(req.params.id)) {
       return res.status(400).json({ message: 'Invalid character ID' });
